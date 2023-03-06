@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SuperHeroAPI.Exceptions;
+using SuperHeroAPI.Middleware;
 
 namespace SuperHeroAPI.Controllers
 {
@@ -41,12 +43,17 @@ namespace SuperHeroAPI.Controllers
         public async Task<ActionResult<SuperHero>> Get(int id)
         {
             var hero = await _context.SuperHeroes.FindAsync(id);
-            //var hero = heroes.Find(x => x.Id == id);
+            ////var hero = heroes.Find(x => x.Id == id);
 
-            if (hero == null) return BadRequest("Hero not found");
+            if (hero == null)
+            {
+                throw new NotFoundException($"A product from the database with ID: {id} could not be found.");
+            }
+            return Ok(hero);
 
-            else return Ok(hero);
-            
+            //if (hero == null) return BadRequest("Hero not found");
+
+            //else return Ok(hero);
         }
         [HttpPost]
         public async Task<ActionResult<List<SuperHero>>> AddHero(SuperHero hero)
@@ -62,8 +69,10 @@ namespace SuperHeroAPI.Controllers
         public async Task<ActionResult<List<SuperHero>>> UpdateHero(SuperHero request)
         {
             var dbHero = await _context.SuperHeroes.FindAsync(request.Id);
-            if (dbHero == null) return BadRequest("Hero not found");
-
+            if (dbHero == null)
+            {
+                throw new NotFoundException($"A product from the database with ID: {request} could not be found.");
+            }
             dbHero.Name = request.Name;
             dbHero.FirstName = request.FirstName;
             dbHero.LastName = request.LastName;
@@ -87,7 +96,10 @@ namespace SuperHeroAPI.Controllers
         {
             var dbHero = await _context.SuperHeroes.FindAsync(id);
 
-            if (dbHero == null) return BadRequest("Hero not found");
+            if (dbHero == null)
+            {
+                throw new NotFoundException($"A product from the database with ID: {id} could not be found.");
+            }
 
             _context.SuperHeroes.Remove(dbHero);
             await _context.SaveChangesAsync();
